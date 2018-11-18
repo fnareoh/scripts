@@ -1,0 +1,44 @@
+gelly () {
+	imgdir="$( xdg-user-dir PICTURES 2>/dev/null || echo ~/Pictures )" 
+	shotdir="$imgdir/shots" 
+	rand=$( head -n256 /dev/urandom | base64 | tr -d '/+' | head -c8 )
+	shotpath="$shotdir/$(date +%Y-%m-%d-%H%M%S)-$rand.png" 
+	mkdir -p "$shotdir"
+	import $( [ "$1" = "-a" ] && echo -window root ) "$shotpath"
+	upload "$shotpath"
+}
+
+upload () {
+	rsync --rsh='ssh' -vPtz --progress -r $* fnareoh@fnareoh.net:www/fnareoh.net/upload
+	for i in $*
+	do
+		echo "http://fnareoh.net/upload/$( basename $i )"
+	done
+}
+
+gelly_local () {
+        shotpath="$1.png"
+        import $( [ "$1" = "-a" ] && echo -window root ) "$shotpath"
+}
+
+paste () {
+	vim tmp
+	rand=$( head -n256 /dev/urandom | base64 | tr -d '/+' | head -c8 )
+	cat paste_head.html > $rand
+	cat tmp >> $rand
+	echo "</pre>" >> $rand
+	upload $rand
+	rm tmp $rand
+}
+
+echo \ \ .-\;\':\':\'-.$'\n'\ \{\'.\'.\'.\'.\'.\}$'\n'\ \)\ \ \ \ \ \ \ \ \ \'\`.$'\n'\'-.\ ._\ ,_.-=\'$'\n'\ \ \`\).\ \(\ \`\)\;\($'\n'\ \ \(\'.\ .\)\(,\'.\)$'\n'\ \ \ \)\ \(\ ,\'\).\($'\n'\ \ \(\ .\'\).\'\(\'\).$'\n'\ \ .\)\ \(\'\ \).\(\'$'\n'\ \ \ \'\ \ \)\ \(\ \ \).$'\n'\ \ \ \ .\'\(\ .\)\'$'\n'\ \ \ \ \ \ .\).\'
+case "$1" in
+   -u) upload $2
+         ;;
+   -l) gelly_local $2
+         ;;
+   -p) paste
+         ;;
+   *) gelly $1
+         ;;
+esac 
