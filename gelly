@@ -4,7 +4,7 @@ gelly () {
 	rand=$( head -n256 /dev/urandom | base64 | tr -d '/+' | head -c8 )
 	shotpath="$shotdir/$(date +%Y-%m-%d-%H%M%S)-$rand.png" 
 	mkdir -p "$shotdir"
-	import $( [ "$1" = "-a" ] && echo -window root ) "$shotpath"
+	gm import $( [ "$1" = "-a" ] && echo -window root ) "$shotpath"
 	upload "$shotpath"
 }
 
@@ -13,12 +13,13 @@ upload () {
 	for i in $*
 	do
 		echo "http://fnareoh.net/upload/$( basename $i )"
+		echo "http://fnareoh.net/upload/$( basename $i )" | xclip
 	done
 }
 
 gelly_local () {
         shotpath="$1.png"
-        import $( [ "$1" = "-a" ] && echo -window root ) "$shotpath"
+        gm import $( [ "$1" = "-a" ] && echo -window root ) "$shotpath"
 }
 
 paste () {
@@ -27,7 +28,9 @@ paste () {
 	cat paste_head.html > $rand
 	cat tmp >> $rand
 	echo "</pre>" >> $rand
-	upload $rand
+	scp $rand ovhy:www/fnareoh.net/paste/
+	echo "http://fnareoh.net/paste/$rand"
+	echo "http://fnareoh.net/paste/$rand" | xclip
 	rm tmp $rand
 }
 
